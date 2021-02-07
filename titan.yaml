@@ -1,0 +1,27 @@
+version: 0.1
+basedir: .
+osm.xml: japan-latest.osm 
+machine.core: 8
+core.nodeshare: 0.6
+split.node: 1000
+split.way: 100
+split.relation: 1
+
+outputfiles: 
+  - node: node.xml
+    way: way.xml
+    relation: relation.xml
+    nodecsv: node.csv
+    waycsv: way.csv
+
+# layers:
+#   - layer: landuse
+#     file:
+#     - fname: 50m_cultural/ne_50m_urban_areas.shp
+#       class: commercial
+#       minzoom: 4
+#       maxzoom: 4
+#     - fname: 10m_cultural/ne_10m_urban_areas.shp
+#       class: commercial
+#       minzoom: 5
+#       maxzoom: 7
