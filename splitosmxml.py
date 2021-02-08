@@ -4,40 +4,43 @@ import linecache
 import subprocess
 import threading
 import math
+import threading
 
-def splitosm( threadno ,startline ,line):
+def splitosm( threadno ,startline ,maxline):
 
     # print message
-    print('Start threadno:' ,str(threadno) ,'startline:' ,str(startline) ,'maxline:' ,str(startline+line))
-    linecnt ,node ,way ,relation ,inloop = 0 ,0 ,0 ,0 ,True
-    elcontinue = ""
+    print('Start threadno:' ,str(threadno) ,'startline:' ,str(startline) ,'maxline:' ,str(startline+maxline),'\n')
+    linecnt ,node ,inloop = 0 ,0 ,True
+    
     while inloop:
         # read a record(node ,way ,relation are valid)
-        line = linecache.getline(osmxml, startline))
-        if line.lstrip(' ').startswith('<node') or elcontinue='node':
-            # convert id ,lat ,lon　to CSV object
-            # 
-            if line.lstrip(' ').endswith('\/>') or line.lstrip(' ').startswith('<node'):
-                # end of element
-                node+=1
-                elcontinue=''
-            else:
-                # continue element
-                elcontinue='node'
-        elif line.lstrip(' ').startswith('<way') or elcontinue='way':
-            way+=1                
-        elif line.lstrip(' ').startswith('<relation') or elcontinue='relation':
-            relation+=1
+        line = linecache.getline(osmxml, startline+linecnt)
+        if line.lstrip(' ').startswith('<node'):
+            if line.lstrip(' ').endswith('\/>'):
+                # ignore no tags record
+                continue
+            tagloop=True
+            while tagloop:
+                linecnt+=1
+                if linecache.getline(osmxml, startline+linecnt).lstrip(' ').startswith('</node'):
+                    break
+            # end of element
+            node+=1
+            if startline+linecnt > startline+maxline:
+                break
+        elif line.lstrip(' ').startswith('<way') or line.lstrip(' ').startswith('<relation'):
+            # end of process
+            break
         linecnt+=1
 
     # print message
-    print('End threadno:' ,str(threadno) ,'endline:' ,str(startline+line))
-    print('Elements node:' ,str(node) ,'way:' ,str(way),'relation:' ,str(relation))
+    print('End threadno:' ,str(threadno) ,'endline:' ,str(startline+linecnt),'\n')
+    print('Elements node:' ,str(node) ,'way:' ,str(way),'relation:' ,str(relation),'\n')
 
 if __name__ == '__main__':
 
     # print message
-    print('Start:['+str(dt.datetime.now())+']')
+    print('Start:['+str(dt.datetime.now())+']','\n')
 
     # open configuration file.
     with open('titan.yaml' ,'r') as yml:
@@ -63,9 +66,10 @@ if __name__ == '__main__':
     threadcnt=0
     linecnt=1
     while threadcnt < maxthread:
-        splitosm(threadcnt ,linecnt ,linethread)
+        th = threading.Thread(target=splitosm ,args=([threadcnt ,linecnt ,linethread]))
+        th.start()
         threadcnt+=1
         linecnt+=linethread
 
     # print message
-    print('End:['+str(dt.datetime.now())+']')
+    print('End:['+str(dt.datetime.now())+']','\n')
