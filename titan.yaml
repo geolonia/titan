@@ -1,7 +1,7 @@
 version: 0.1
 basedir: .
-osm.xml: shikoku-latest.osm 
-machine.core: 8
+osm.xml: japan-latest.osm 
+machine.core: 2
 core.nodeshare: 0.6
 split.node: 1000
 split.way: 100

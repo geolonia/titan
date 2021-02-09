@@ -10,37 +10,39 @@ def splitosm( threadno ,startline ,maxline):
 
     # print message
     print('Start threadno:' ,str(threadno) ,'startline:' ,str(startline) ,'maxline:' ,str(startline+maxline),'\n')
-    linecnt ,node ,inloop = 0 ,0 ,True
+    linecnt ,node = 0 ,0
     
-    while inloop:
+    while True:
         # read a record(node ,way ,relation are valid)
         line = linecache.getline(osmxml, startline+linecnt)
         if line.lstrip(' ').startswith('<node'):
-            if line.lstrip(' ').endswith('\/>'):
+            if line.endswith('/>\n'):
                 # ignore no tags record
+                linecnt+=1
                 continue
-            tagloop=True
-            while tagloop:
+            
+            node+=1
+            while True:
                 linecnt+=1
                 if linecache.getline(osmxml, startline+linecnt).lstrip(' ').startswith('</node'):
+                    #print(str(startline+linecnt))
                     break
-            # end of element
-            node+=1
-            if startline+linecnt > startline+maxline:
-                break
         elif line.lstrip(' ').startswith('<way') or line.lstrip(' ').startswith('<relation'):
             # end of process
             break
         linecnt+=1
+        # end of element
+        if startline+linecnt > startline+maxline:
+            break
 
     # print message
-    print('End threadno:' ,str(threadno) ,'endline:' ,str(startline+linecnt),'\n')
-    print('Elements node:' ,str(node) ,'way:' ,str(way),'relation:' ,str(relation),'\n')
+    print('End threadno:' ,str(threadno) ,'endline:' ,str(startline+linecnt))
+    print('Elements node:' ,str(node))
 
 if __name__ == '__main__':
 
     # print message
-    print('Start:['+str(dt.datetime.now())+']','\n')
+    print('Start:['+str(dt.datetime.now())+']')
 
     # open configuration file.
     with open('titan.yaml' ,'r') as yml:
@@ -65,11 +67,15 @@ if __name__ == '__main__':
     # exec splitosm thread
     threadcnt=0
     linecnt=1
+    threads=[]
     while threadcnt < maxthread:
         th = threading.Thread(target=splitosm ,args=([threadcnt ,linecnt ,linethread]))
         th.start()
+        threads.append(th)
         threadcnt+=1
         linecnt+=linethread
 
+    for th in threads:
+        th.join()
     # print message
-    print('End:['+str(dt.datetime.now())+']','\n')
+    print('End:['+str(dt.datetime.now())+']')
