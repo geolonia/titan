@@ -144,7 +144,8 @@ cython_debug/
 
 # OSM data
 *.osm
+*.osm.*
 *.bz2
 
-# Test
+# test code
 test/

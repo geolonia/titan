@@ -5,39 +5,35 @@ import subprocess
 import threading
 import math
 import threading
+import glob
+import os
 
-def splitosm( threadno ,startline ,maxline):
+def readosmxml( threadno ,filename):
 
     # print message
-    print('Start threadno:' ,str(threadno) ,'startline:' ,str(startline) ,'maxline:' ,str(startline+maxline),'\n')
-    linecnt ,node = 0 ,0
+    print('Start threadno:' ,str(threadno) ,'filename:' ,filename,'\n')
+    node = 0 
     
-    while True:
+    with open(filename) as f:
         # read a record(node ,way ,relation are valid)
-        line = linecache.getline(osmxml, startline+linecnt)
-        if line.lstrip(' ').startswith('<node'):
-            if line.endswith('/>\n'):
-                # ignore no tags record
-                linecnt+=1
-                continue
-            
-            node+=1
-            while True:
-                linecnt+=1
-                if linecache.getline(osmxml, startline+linecnt).lstrip(' ').startswith('</node'):
-                    #print(str(startline+linecnt))
-                    break
-        elif line.lstrip(' ').startswith('<way') or line.lstrip(' ').startswith('<relation'):
-            # end of process
-            break
-        linecnt+=1
-        # end of element
-        if startline+linecnt > startline+maxline:
-            break
+        for line in f:
+            if line.lstrip(' ').startswith('<node'):
+                if line.endswith('/>\n'):
+                    # ignore no tags record
+                    continue
+                node+=1
+            elif line.lstrip(' ').startswith('<way') or line.lstrip(' ').startswith('<relation'):
+                # end of process
+                break
 
     # print message
-    print('End threadno:' ,str(threadno) ,'endline:' ,str(startline+linecnt))
-    print('Elements node:' ,str(node))
+    print('End threadno:' ,str(threadno) ,'Elements node:' ,str(node))
+
+def alpha2num(alpha):
+    num=0
+    for index, item in enumerate(list(alpha)):
+        num += pow(26,len(alpha)-index-1)*(ord(item)-ord('a')+1)
+    return num
 
 if __name__ == '__main__':
 
@@ -55,26 +51,33 @@ if __name__ == '__main__':
     splitway = config['split.way']
     splitrelation = config['split.relation']
 
-    # get split and thread param
+    # get size for osm.xml and split files
+    osmxmlsize = os.path.getsize(osmxml)
     maxthread = core-1
-    linethread = math.ceil(maxline/maxthread)
-
-    # line count in osm.xml
-    maxline = int(subprocess.check_output(['wc', '-l', osmxml]).decode().lstrip(' ').split(' ')[0])
-    print('maxline:' ,str(maxline))
-    # split osm.xml
-    subprocess.check_output(['split' ,'-d' ,'-l' ,str(linethread) ,osmxml])
+    size = math.ceil(osmxmlsize/maxthread)
+    print('osmxmlsize:' ,str(osmxmlsize) ,'size:' ,str(size))
+    # remove split files and split osm.xml
+    for f in glob.glob(osmxml+'.*'):
+        os.remove(f)
+    subprocess.check_output(['split' ,'-b' ,str(size) ,osmxml ,osmxml+'.'])
+    # get split osmxml(name sort)
+    osmxmlfiles = sorted(glob.glob(osmxml+'.*'))
+    splitlist = []
+    for filename in osmxmlfiles:
+        # extent convert with number(extent start with 'aa')
+        ext = os.path.splitext(filename)[1].lstrip('.')
+        splitfilename = os.path.splitext(os.path.basename(filename))[0]+'.'+str(alpha2num(ext) - 27)
+        os.rename(filename ,splitfilename)
+        splitlist.append(splitfilename)
 
     # exec splitosm thread
     threadcnt=0
-    linecnt=1
     threads=[]
     while threadcnt < maxthread:
-        th = threading.Thread(target=splitosm ,args=([threadcnt ,linecnt ,linethread]))
+        th = threading.Thread(target=readosmxml ,args=([threadcnt ,splitlist[threadcnt]]))
         th.start()
         threads.append(th)
         threadcnt+=1
-        linecnt+=linethread
 
     for th in threads:
         th.join()
