@@ -1,11 +1,16 @@
 version: 0.1
 basedir: .
 osm.xml: japan-latest.osm 
-machine.core: 8
-core.nodeshare: 0.6
-split.node: 1000
-split.way: 100
-split.relation: 1
+core: 11
+
+placevalues: 
+- city
+- town
+- village
+- island
+- quarter
+- neighbourhood
+- locality
 
 outputfiles: 
   - node: node.xml
