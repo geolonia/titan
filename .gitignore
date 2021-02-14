@@ -149,4 +149,4 @@ cython_debug/
 
 # test code
 test/
-.vscode
+.vscode/
