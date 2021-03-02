@@ -46,6 +46,7 @@ def readosmxml(osmxml ,procno ,placevalues):
                         elif line.lstrip(' ').startswith('</node>\n'):
                             # end of <node process
                             if 'place' in taginf:
+                                # yamlからのリストによる判定実装までの一時的な処置
                                 if taginf['place']=='city' or taginf['place']=='town' or taginf['place']=='village' or taginf['place']=='island' or taginf['place']=='quarter' or taginf['place']=='neighbourhood' or taginf['place']=='locality':
                                     value = [id,taginf.get('place'),taginf.get('name'),taginf.get('name:ja-Hira'),taginf.get('name:en'),lon,lat]
                                     csvlist.append(value)
@@ -116,8 +117,7 @@ if __name__ == '__main__':
     csvlist = sorted(glob.glob(osmxml+'.*.csv'))
     command = ['cat']
     command = command + csvlist
-    command.append('>')
-    command.append(osmxml+'.csv')
+    command.append('>'+osmxml+'.csv')
     commandstr = ' '.join(command)
     subprocess.check_output(commandstr ,shell=True)
     # print message
