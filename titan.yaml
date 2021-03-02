@@ -1,0 +1,20 @@
+version: 0.1
+basedir: .
+osm.xml: japan-latest.osm 
+core: 11
+
+placevalues: 
+- city
+- town
+- village
+- island
+- quarter
+- neighbourhood
+- locality
+
+outputfiles: 
+  - node: node.xml
+    way: way.xml
+    relation: relation.xml
+    nodecsv: node.csv
+    waycsv: way.csv

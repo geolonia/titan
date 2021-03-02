@@ -141,3 +141,12 @@ cython_debug/
 
 # Mac
 .DS_Store
+
+# OSM data
+*.osm
+*.osm.*
+*.bz2
+
+# test code
+test/
+.vscode/
