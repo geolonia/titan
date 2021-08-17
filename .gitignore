@@ -150,3 +150,7 @@ cython_debug/
 # test code
 test/
 .vscode/
+
+output.json
+temp.csv
+error.json

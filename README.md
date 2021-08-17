@@ -4,9 +4,13 @@
 
 ## 概要
 
-GeoFabrik社のダウンロードサイトからosmのXML形式ファイルを入手し、mbtilesへ変換します。
+GeoFabrik社のダウンロードサイトからosm.pbf形式ファイルから、GeoJSON形式ファイルへへ変換します。
 
 ## 利用方法
 
-現時点では、住所データの抽出のみ実現しています。
-実行方法は、titan.yamlに抽出タグ名と出力ファイル名を指定し、getnode.pyを実行します。
++ 現時点では、四国（shikoku-latest.osm.pbf）の学校データ（タグ名amenity=school）のみ動作検証済みです。  
++ 変換対象の図形種別は、Point、Polygon、MultiPolygonの３種類です。  
++ osm.pbfのNode、Way、Relationとも対応しています。
++ 事前にosmiumにて、NodeとWay間の関係付けが必要です。コマンドイメージは以下の通りです。
+
+`% osmium add-locations-to-ways -n -o shikoku-low.osm.pbf shikoku-latest.osm.pbf`
